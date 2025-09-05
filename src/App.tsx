@@ -1,8 +1,22 @@
+import Examples from "./components/Examples";
+import Features from "./components/Features";
+import Footer from "./components/Footer";
+import Hero from "./components/Hero";
+import HowItWorks from "./components/HowItWorks";
+import Navbar from "./components/Navbar";
+import Pricing from "./components/Pricing";
+
 function App() {
   return (
-    <>
-      <h1 className=" text-7xl font-bold uppercase text-center mt-5">Hello sahid</h1>
-    </>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900">
+      <Navbar />
+      <Hero />
+      <Features />
+      <Examples />
+      <HowItWorks />
+      <Pricing />
+      <Footer />
+    </div>
   );
 }
 
