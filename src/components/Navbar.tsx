@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Sparkles, Menu, X } from "lucide-react";
+import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 
 const Navbar = () => {
+  const { isSignedIn } = useUser();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -51,11 +53,22 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Get Started Button */}
-          <div className="hidden md:block">
-            <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
-              Get Started
-            </button>
+          {/* Clerk Auth Button + Get Started (Desktop) */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isSignedIn ? (
+              <>
+                <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
+                  Get Started
+                </button>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <SignInButton mode="modal">
+                <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25">
+                  Sign In
+                </button>
+              </SignInButton>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -85,10 +98,21 @@ const Navbar = () => {
                   {item.name}
                 </a>
               ))}
-              <div className="pt-2">
-                <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300">
-                  Get Started
-                </button>
+              <div className="pt-2 flex items-center space-x-2">
+                {isSignedIn ? (
+                  <>
+                    <UserButton afterSignOutUrl="/" />
+                    <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300">
+                      Get Started
+                    </button>
+                  </>
+                ) : (
+                  <SignInButton mode="modal">
+                    <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-300">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                )}
               </div>
             </div>
           </div>
