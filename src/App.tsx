@@ -7,6 +7,8 @@ import Navbar from "./components/Navbar";
 import Pricing from "./components/Pricing";
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { Routes, Route } from "react-router-dom";
+import Demo from "./components/Demo";
 
 function App() {
   useEffect(() => {
@@ -28,12 +30,22 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900">
       <Navbar />
-      <Hero />
-      <Features />
-      <Examples />
-      <HowItWorks />
-      <Pricing />
-      <Footer />
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Hero />
+              <Features />
+              <Examples />
+              <HowItWorks />
+              <Pricing />
+              <Footer />
+            </>
+          }
+        />
+        <Route path="/demo" element={<Demo />} />
+      </Routes>
     </div>
   );
 }

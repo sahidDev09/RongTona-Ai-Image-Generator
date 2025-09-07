@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Upload, Sparkles, ArrowRight } from "lucide-react";
 
 const Hero = () => {
@@ -19,6 +20,8 @@ const Hero = () => {
     setIsDragging(false);
     // Handle file upload logic here
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
@@ -56,7 +59,9 @@ const Hero = () => {
               Start Creating
               <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
             </button>
-            <button className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 hover:shadow-lg">
+            <button
+              className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 hover:shadow-lg"
+              onClick={() => navigate("/demo")}>
               Watch Demo
             </button>
           </div>
