@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import { Routes, Route } from "react-router-dom";
 import Demo from "./components/Demo";
+import AIStudio from "./components/AIStudio";
 
 function App() {
   useEffect(() => {
@@ -45,6 +46,7 @@ function App() {
           }
         />
         <Route path="/demo" element={<Demo />} />
+        <Route path="/studio" element={<AIStudio />} />
       </Routes>
     </div>
   );
