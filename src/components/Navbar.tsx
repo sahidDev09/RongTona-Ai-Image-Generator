@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sparkles, Menu, X } from "lucide-react";
 import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const { isSignedIn } = useUser();
@@ -32,12 +33,14 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg mr-3">
-              <Sparkles className="w-6 h-6 text-white" />
+          <Link to="/" className="flex items-center">
+            <div className="flex items-center">
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg mr-3">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xl font-bold text-white">RongTona Ai</span>
             </div>
-            <span className="text-xl font-bold text-white">RongTona Ai</span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
