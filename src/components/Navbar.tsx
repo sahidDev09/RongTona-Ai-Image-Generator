@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Menu, X } from "lucide-react";
 import { SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";

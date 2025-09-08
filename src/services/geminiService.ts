@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
+
 // Define and export ImageEditOptions interface here
 export interface ImageEditOptions {
   image: File;
@@ -13,7 +13,8 @@ if (!API_KEY) {
   throw new Error("Google Gemini API key is not configured");
 }
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+// Initialize the modern GenAI SDK
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export interface GenerationOptions {
   prompt: string;
@@ -23,26 +24,33 @@ export interface GenerationOptions {
 }
 
 export class GeminiImageService {
-  private model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-  private textModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+  // Model for image generation/editing via Gemini API
+  private readonly imageModelId = "gemini-2.5-flash-image-preview";
 
   async generateImage(options: GenerationOptions): Promise<string> {
     try {
-      // Since Gemini doesn't directly generate images, we'll create a detailed prompt
-      // and simulate image generation with a placeholder that represents the concept
-      const enhancedPrompt = this.enhancePrompt(options.prompt, options.style);
+      const prompt = this.enhancePrompt(options.prompt, options.style);
 
-      const result = await this.textModel.generateContent([
-        `Create a detailed visual description for an AI image generator based on this prompt: "${enhancedPrompt}". 
-         Include specific details about composition, lighting, colors, style, and artistic elements. 
-         Make it suitable for ${options.style || "realistic"} style.`,
-      ]);
+      const response = await ai.models.generateContent({
+        model: this.imageModelId,
+        contents: [prompt],
+      });
 
-      const description = result.response.text();
+      // Find the first image part in the response and return it as a data URL
+      type InlinePart = {
+        inlineData?: { data: string; mimeType?: string };
+        text?: string;
+      };
+      const parts: InlinePart[] =
+        (response.candidates?.[0]?.content?.parts as InlinePart[]) ?? [];
+      for (const part of parts) {
+        if (part.inlineData && part.inlineData.data) {
+          const mime = part.inlineData.mimeType || "image/png";
+          return `data:${mime};base64,${part.inlineData.data}`;
+        }
+      }
 
-      // For demo purposes, we'll return a placeholder image URL
-      // In a real implementation, you'd use this description with an actual image generation API
-      return this.generatePlaceholderImage(options.prompt, options.style);
+      throw new Error("No image returned by Gemini.");
     } catch (error) {
       console.error("Error generating image:", error);
       throw new Error("Failed to generate image. Please try again.");
@@ -52,29 +60,39 @@ export class GeminiImageService {
   async editImage(options: ImageEditOptions): Promise<string> {
     try {
       // Convert image to base64
-      const imageData = await this.fileToBase64(options.image);
+      const imageDataUrl = await this.fileToBase64(options.image);
+      const base64 = imageDataUrl.split(",")[1];
 
       const imagePart = {
         inlineData: {
-          data: imageData.split(",")[1],
-          mimeType: options.image.type,
+          data: base64,
+          mimeType: options.image.type || "image/png",
         },
       };
 
       const enhancedPrompt = `Transform this image: ${options.prompt}. Style: ${
         options.style || "action figure"
-      }. 
-                             Provide detailed instructions for the transformation while maintaining the subject's key features.`;
+      }. Maintain the subject's key features and natural lighting.`;
 
-      const result = await this.model.generateContent([
-        enhancedPrompt,
-        imagePart,
-      ]);
-      const transformation = result.response.text();
+      const response = await ai.models.generateContent({
+        model: this.imageModelId,
+        contents: [enhancedPrompt, imagePart],
+      });
 
-      // For demo purposes, return a transformed placeholder
-      // In production, you'd use this analysis with an actual image editing API
-      return this.generateTransformedImage(options.image.name, options.style);
+      type InlinePart = {
+        inlineData?: { data: string; mimeType?: string };
+        text?: string;
+      };
+      const parts: InlinePart[] =
+        (response.candidates?.[0]?.content?.parts as InlinePart[]) ?? [];
+      for (const part of parts) {
+        if (part.inlineData && part.inlineData.data) {
+          const mime = part.inlineData.mimeType || "image/png";
+          return `data:${mime};base64,${part.inlineData.data}`;
+        }
+      }
+
+      throw new Error("No edited image returned by Gemini.");
     } catch (error) {
       console.error("Error editing image:", error);
       throw new Error("Failed to edit image. Please try again.");
@@ -82,7 +100,7 @@ export class GeminiImageService {
   }
 
   private enhancePrompt(prompt: string, style?: string): string {
-    const styleEnhancements = {
+    const styleEnhancements: Record<string, string> = {
       "action-figure":
         "as a detailed action figure with articulated joints, dynamic pose, heroic proportions",
       superhero:
@@ -95,9 +113,9 @@ export class GeminiImageService {
         "as a cartoon character with exaggerated features and bright colors",
     };
 
-    const enhancement =
-      styleEnhancements[style as keyof typeof styleEnhancements] || "";
-    return `${prompt} ${enhancement}`;
+    const enhancement = style ? styleEnhancements[style] || "" : "";
+    // Encourage coherent visuals
+    return `${prompt} ${enhancement}. Highly detailed, coherent composition, professional lighting.`.trim();
   }
 
   private async fileToBase64(file: File): Promise<string> {
@@ -107,28 +125,6 @@ export class GeminiImageService {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  }
-
-  private generatePlaceholderImage(prompt: string, style?: string): string {
-    // Generate a unique placeholder based on prompt and style
-    const seed = this.hashString(prompt + (style || ""));
-    return `https://picsum.photos/seed/${seed}/800/600`;
-  }
-
-  private generateTransformedImage(filename: string, style?: string): string {
-    // Generate a unique transformed placeholder
-    const seed = this.hashString(filename + (style || "") + "transformed");
-    return `https://picsum.photos/seed/${seed}/800/600`;
-  }
-
-  private hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
   }
 }
 

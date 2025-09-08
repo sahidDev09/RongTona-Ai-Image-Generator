@@ -1,29 +1,41 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Sparkles, Download, Loader2, X } from 'lucide-react';
-import { geminiService } from '../services/geminiService';
-import type { ImageEditOptions } from '../services/geminiService';
+import { useState, useRef } from "react";
+import { Upload, Sparkles, Download, Loader2, X } from "lucide-react";
+import { geminiService } from "../services/geminiService";
+import type { ImageEditOptions } from "../services/geminiService";
 
 const ImageEditor = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [editPrompt, setEditPrompt] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState('action-figure');
+  const [editPrompt, setEditPrompt] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState("action-figure");
   const [editedImage, setEditedImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const styles = [
-    { id: 'action-figure', name: 'Action Figure', description: 'Transform into collectible action figure' },
-    { id: 'superhero', name: 'Superhero', description: 'Become a caped crusader' },
-    { id: 'anime', name: 'Anime', description: 'Japanese animation style' },
-    { id: 'realistic', name: 'Realistic', description: 'Photorealistic enhancement' },
-    { id: 'vintage', name: 'Vintage', description: 'Classic retro style' },
-    { id: 'cartoon', name: 'Cartoon', description: 'Animated cartoon style' }
+    {
+      id: "action-figure",
+      name: "Action Figure",
+      description: "Transform into collectible action figure",
+    },
+    {
+      id: "superhero",
+      name: "Superhero",
+      description: "Become a caped crusader",
+    },
+    { id: "anime", name: "Anime", description: "Japanese animation style" },
+    {
+      id: "realistic",
+      name: "Realistic",
+      description: "Photorealistic enhancement",
+    },
+    { id: "vintage", name: "Vintage", description: "Classic retro style" },
+    { id: "cartoon", name: "Cartoon", description: "Animated cartoon style" },
   ];
 
   const handleFileSelect = (file: File) => {
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setSelectedImage(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -68,21 +80,21 @@ const ImageEditor = () => {
       const options: ImageEditOptions = {
         image: selectedImage,
         prompt: editPrompt.trim(),
-        style: selectedStyle
+        style: selectedStyle,
       };
 
       const editedImageUrl = await geminiService.editImage(options);
       setEditedImage(editedImageUrl);
     } catch (error) {
-      console.error('Edit failed:', error);
-      alert('Failed to edit image. Please try again.');
+      console.error("Edit failed:", error);
+      alert("Failed to edit image. Please try again.");
     } finally {
       setIsEditing(false);
     }
   };
 
   const handleDownload = (imageUrl: string, filename: string) => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = imageUrl;
     link.download = filename;
     link.click();
@@ -92,9 +104,9 @@ const ImageEditor = () => {
     setSelectedImage(null);
     setImagePreview(null);
     setEditedImage(null);
-    setEditPrompt('');
+    setEditPrompt("");
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -103,28 +115,37 @@ const ImageEditor = () => {
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
         <div className="flex items-center mb-6">
           <Sparkles className="w-6 h-6 text-blue-400 mr-3" />
-          <h2 className="text-2xl font-bold text-white">Transform Your Image</h2>
+          <h2 className="text-2xl font-bold text-white">
+            Transform Your Image
+          </h2>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Upload Section */}
           <div>
-            <label className="block text-white font-medium mb-3">Upload Image</label>
+            <label className="block text-white font-medium mb-3">
+              Upload Image
+            </label>
             {!imagePreview ? (
               <div
                 className={`relative border-2 border-dashed rounded-xl p-12 transition-all duration-300 cursor-pointer ${
                   isDragging
-                    ? 'border-blue-400 bg-blue-500/10'
-                    : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
+                    ? "border-blue-400 bg-blue-500/10"
+                    : "border-slate-600 hover:border-slate-500 bg-slate-800/50"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-              >
+                onClick={() => fileInputRef.current?.click()}>
                 <div className="text-center">
-                  <Upload className={`w-12 h-12 mx-auto mb-4 transition-colors ${isDragging ? 'text-blue-400' : 'text-slate-400'}`} />
-                  <p className="text-slate-300 mb-2 font-medium">Drop your image here</p>
+                  <Upload
+                    className={`w-12 h-12 mx-auto mb-4 transition-colors ${
+                      isDragging ? "text-blue-400" : "text-slate-400"
+                    }`}
+                  />
+                  <p className="text-slate-300 mb-2 font-medium">
+                    Drop your image here
+                  </p>
                   <p className="text-slate-500 text-sm">or click to browse</p>
                 </div>
                 <input
@@ -139,8 +160,7 @@ const ImageEditor = () => {
               <div className="relative bg-slate-800/50 rounded-xl p-4">
                 <button
                   onClick={clearImage}
-                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors duration-300 z-10"
-                >
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors duration-300 z-10">
                   <X className="w-4 h-4" />
                 </button>
                 <img
@@ -155,7 +175,9 @@ const ImageEditor = () => {
             {imagePreview && (
               <div className="mt-6 space-y-4">
                 <div>
-                  <label className="block text-white font-medium mb-3">Transformation Prompt</label>
+                  <label className="block text-white font-medium mb-3">
+                    Transformation Prompt
+                  </label>
                   <textarea
                     value={editPrompt}
                     onChange={(e) => setEditPrompt(e.target.value)}
@@ -165,7 +187,9 @@ const ImageEditor = () => {
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-3">Style</label>
+                  <label className="block text-white font-medium mb-3">
+                    Style
+                  </label>
                   <div className="grid grid-cols-2 gap-2">
                     {styles.map((style) => (
                       <button
@@ -173,11 +197,12 @@ const ImageEditor = () => {
                         onClick={() => setSelectedStyle(style.id)}
                         className={`p-3 rounded-lg border transition-all duration-300 text-left ${
                           selectedStyle === style.id
-                            ? 'border-blue-500 bg-blue-500/20'
-                            : 'border-slate-600 bg-slate-800/30 hover:border-slate-500'
-                        }`}
-                      >
-                        <div className="text-white font-medium text-sm">{style.name}</div>
+                            ? "border-blue-500 bg-blue-500/20"
+                            : "border-slate-600 bg-slate-800/30 hover:border-slate-500"
+                        }`}>
+                        <div className="text-white font-medium text-sm">
+                          {style.name}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -186,8 +211,7 @@ const ImageEditor = () => {
                 <button
                   onClick={handleEdit}
                   disabled={!editPrompt.trim() || isEditing}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center"
-                >
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center">
                   {isEditing ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -206,15 +230,23 @@ const ImageEditor = () => {
 
           {/* Result Section */}
           <div>
-            <label className="block text-white font-medium mb-3">Transformed Result</label>
+            <label className="block text-white font-medium mb-3">
+              Transformed Result
+            </label>
             {editedImage ? (
               <div className="bg-slate-800/50 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Transformed Image</h3>
+                  <h3 className="text-lg font-semibold text-white">
+                    Transformed Image
+                  </h3>
                   <button
-                    onClick={() => handleDownload(editedImage, `transformed-${Date.now()}.jpg`)}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center"
-                  >
+                    onClick={() =>
+                      handleDownload(
+                        editedImage,
+                        `transformed-${Date.now()}.jpg`
+                      )
+                    }
+                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center">
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </button>
@@ -228,7 +260,9 @@ const ImageEditor = () => {
             ) : (
               <div className="border-2 border-dashed border-slate-600 rounded-xl p-12 text-center">
                 <Sparkles className="w-12 h-12 mx-auto mb-4 text-slate-500" />
-                <p className="text-slate-400">Your transformed image will appear here</p>
+                <p className="text-slate-400">
+                  Your transformed image will appear here
+                </p>
               </div>
             )}
           </div>

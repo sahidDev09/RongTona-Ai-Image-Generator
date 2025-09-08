@@ -1,20 +1,35 @@
-import React, { useState } from 'react';
-import { Sparkles, Wand2, Download, Loader2 } from 'lucide-react';
-import { geminiService, type GenerationOptions } from '../services/geminiService';
+import { useState } from "react";
+import { Sparkles, Wand2, Download, Loader2 } from "lucide-react";
+import {
+  geminiService,
+  type GenerationOptions,
+} from "../services/geminiService";
 
 const ImageGenerator = () => {
-  const [prompt, setPrompt] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState('action-figure');
+  const [prompt, setPrompt] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState("action-figure");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const styles = [
-    { id: 'action-figure', name: 'Action Figure', description: 'Transform into collectible action figure' },
-    { id: 'superhero', name: 'Superhero', description: 'Become a caped crusader' },
-    { id: 'anime', name: 'Anime', description: 'Japanese animation style' },
-    { id: 'realistic', name: 'Realistic', description: 'Photorealistic enhancement' },
-    { id: 'vintage', name: 'Vintage', description: 'Classic retro style' },
-    { id: 'cartoon', name: 'Cartoon', description: 'Animated cartoon style' }
+    {
+      id: "action-figure",
+      name: "Action Figure",
+      description: "Transform into collectible action figure",
+    },
+    {
+      id: "superhero",
+      name: "Superhero",
+      description: "Become a caped crusader",
+    },
+    { id: "anime", name: "Anime", description: "Japanese animation style" },
+    {
+      id: "realistic",
+      name: "Realistic",
+      description: "Photorealistic enhancement",
+    },
+    { id: "vintage", name: "Vintage", description: "Classic retro style" },
+    { id: "cartoon", name: "Cartoon", description: "Animated cartoon style" },
   ];
 
   const handleGenerate = async () => {
@@ -25,14 +40,14 @@ const ImageGenerator = () => {
       const options: GenerationOptions = {
         prompt: prompt.trim(),
         style: selectedStyle,
-        quality: 'high'
+        quality: "high",
       };
 
       const imageUrl = await geminiService.generateImage(options);
       setGeneratedImage(imageUrl);
     } catch (error) {
-      console.error('Generation failed:', error);
-      alert('Failed to generate image. Please try again.');
+      console.error("Generation failed:", error);
+      alert("Failed to generate image. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -40,7 +55,7 @@ const ImageGenerator = () => {
 
   const handleDownload = () => {
     if (generatedImage) {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = generatedImage;
       link.download = `generated-${Date.now()}.jpg`;
       link.click();
@@ -58,7 +73,9 @@ const ImageGenerator = () => {
         <div className="space-y-6">
           {/* Prompt Input */}
           <div>
-            <label className="block text-white font-medium mb-3">Describe what you want to create</label>
+            <label className="block text-white font-medium mb-3">
+              Describe what you want to create
+            </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
@@ -69,7 +86,9 @@ const ImageGenerator = () => {
 
           {/* Style Selection */}
           <div>
-            <label className="block text-white font-medium mb-3">Choose Style</label>
+            <label className="block text-white font-medium mb-3">
+              Choose Style
+            </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {styles.map((style) => (
                 <button
@@ -77,12 +96,13 @@ const ImageGenerator = () => {
                   onClick={() => setSelectedStyle(style.id)}
                   className={`p-4 rounded-xl border transition-all duration-300 text-left ${
                     selectedStyle === style.id
-                      ? 'border-blue-500 bg-blue-500/20'
-                      : 'border-slate-600 bg-slate-800/30 hover:border-slate-500'
-                  }`}
-                >
+                      ? "border-blue-500 bg-blue-500/20"
+                      : "border-slate-600 bg-slate-800/30 hover:border-slate-500"
+                  }`}>
                   <div className="text-white font-medium">{style.name}</div>
-                  <div className="text-slate-400 text-sm mt-1">{style.description}</div>
+                  <div className="text-slate-400 text-sm mt-1">
+                    {style.description}
+                  </div>
                 </button>
               ))}
             </div>
@@ -92,8 +112,7 @@ const ImageGenerator = () => {
           <button
             onClick={handleGenerate}
             disabled={!prompt.trim() || isGenerating}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center"
-          >
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center">
             {isGenerating ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -111,11 +130,12 @@ const ImageGenerator = () => {
           {generatedImage && (
             <div className="mt-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-white">Generated Image</h3>
+                <h3 className="text-xl font-semibold text-white">
+                  Generated Image
+                </h3>
                 <button
                   onClick={handleDownload}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center"
-                >
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center">
                   <Download className="w-4 h-4 mr-2" />
                   Download
                 </button>

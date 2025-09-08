@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import { Wand2, Upload, Sparkles } from 'lucide-react';
-import ImageGenerator from './ImageGenerator';
-import ImageEditor from './ImageEditor';
+import { useState } from "react";
+import { Wand2, Upload, Sparkles } from "lucide-react";
+import ImageGenerator from "./ImageGenerator";
+import ImageEditor from "./ImageEditor";
 
 const AIStudio = () => {
-  const [activeTab, setActiveTab] = useState<'generate' | 'edit'>('generate');
+  const [activeTab, setActiveTab] = useState<"generate" | "edit">("generate");
 
   const tabs = [
     {
-      id: 'generate' as const,
-      name: 'Generate from Text',
+      id: "generate" as const,
+      name: "Generate from Text",
       icon: Wand2,
-      description: 'Create images from text descriptions'
+      description: "Create images from text descriptions",
     },
     {
-      id: 'edit' as const,
-      name: 'Transform Image',
+      id: "edit" as const,
+      name: "Transform Image",
       icon: Upload,
-      description: 'Upload and transform existing images'
-    }
+      description: "Upload and transform existing images",
+    },
   ];
 
   return (
@@ -29,7 +29,7 @@ const AIStudio = () => {
             <Sparkles className="w-4 h-4 text-blue-400 mr-2" />
             <span className="text-blue-300 text-sm font-medium">AI Studio</span>
           </div>
-          
+
           <h1 className="text-4xl lg:text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-6">
             Create & Transform
             <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
@@ -37,7 +37,8 @@ const AIStudio = () => {
             </span>
           </h1>
           <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Generate stunning images from text or transform your existing photos into action figures, artwork, and more.
+            Generate stunning images from text or transform your existing photos
+            into action figures, artwork, and more.
           </p>
         </div>
 
@@ -51,10 +52,9 @@ const AIStudio = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center px-6 py-4 rounded-xl font-semibold transition-all duration-300 ${
                     activeTab === tab.id
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                      : "text-slate-300 hover:text-white hover:bg-white/10"
+                  }`}>
                   <tab.icon className="w-5 h-5 mr-3" />
                   <div className="text-left">
                     <div className="font-semibold">{tab.name}</div>
@@ -68,8 +68,8 @@ const AIStudio = () => {
 
         {/* Tab Content */}
         <div className="transition-all duration-300">
-          {activeTab === 'generate' && <ImageGenerator />}
-          {activeTab === 'edit' && <ImageEditor />}
+          {activeTab === "generate" && <ImageGenerator />}
+          {activeTab === "edit" && <ImageEditor />}
         </div>
       </div>
     </div>
