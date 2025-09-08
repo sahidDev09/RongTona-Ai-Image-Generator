@@ -66,10 +66,13 @@ const ImageEditor = () => {
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    const input = e.currentTarget;
+    const files = input.files;
     if (files && files.length > 0) {
       handleFileSelect(files[0]);
     }
+    // Clear the input so selecting the same file again triggers change
+    input.value = "";
   };
 
   const handleEdit = async () => {
@@ -111,7 +114,7 @@ const ImageEditor = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
         <div className="flex items-center mb-6">
           <Sparkles className="w-6 h-6 text-blue-400 mr-3" />
@@ -120,7 +123,7 @@ const ImageEditor = () => {
           </h2>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {/* Upload Section */}
           <div>
             <label className="block text-white font-medium mb-3">
@@ -128,16 +131,15 @@ const ImageEditor = () => {
             </label>
             {!imagePreview ? (
               <div
-                className={`relative border-2 border-dashed rounded-xl p-12 transition-all duration-300 cursor-pointer ${
+                className={`relative border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer ${
                   isDragging
                     ? "border-blue-400 bg-blue-500/10"
                     : "border-slate-600 hover:border-slate-500 bg-slate-800/50"
-                }`}
+                } aspect-square overflow-hidden flex items-center justify-center`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}>
-                <div className="text-center">
+                onDrop={handleDrop}>
+                <div className="text-center px-6">
                   <Upload
                     className={`w-12 h-12 mx-auto mb-4 transition-colors ${
                       isDragging ? "text-blue-400" : "text-slate-400"
@@ -157,73 +159,17 @@ const ImageEditor = () => {
                 />
               </div>
             ) : (
-              <div className="relative bg-slate-800/50 rounded-xl p-4">
+              <div className="relative border-2 border-dashed border-slate-600 rounded-xl bg-slate-800/50 aspect-square overflow-hidden">
                 <button
                   onClick={clearImage}
-                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transition-colors duration-300 z-10">
+                  className="absolute top-2 right-2 bg-red-500/90 hover:bg-red-600 text-white p-2 rounded-full transition-colors duration-300 z-10">
                   <X className="w-4 h-4" />
                 </button>
                 <img
                   src={imagePreview}
                   alt="Selected"
-                  className="w-full rounded-lg shadow-lg"
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
-              </div>
-            )}
-
-            {/* Edit Controls */}
-            {imagePreview && (
-              <div className="mt-6 space-y-4">
-                <div>
-                  <label className="block text-white font-medium mb-3">
-                    Transformation Prompt
-                  </label>
-                  <textarea
-                    value={editPrompt}
-                    onChange={(e) => setEditPrompt(e.target.value)}
-                    placeholder="Transform this person into a superhero with cape and mask..."
-                    className="w-full h-24 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-white font-medium mb-3">
-                    Style
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {styles.map((style) => (
-                      <button
-                        key={style.id}
-                        onClick={() => setSelectedStyle(style.id)}
-                        className={`p-3 rounded-lg border transition-all duration-300 text-left ${
-                          selectedStyle === style.id
-                            ? "border-blue-500 bg-blue-500/20"
-                            : "border-slate-600 bg-slate-800/30 hover:border-slate-500"
-                        }`}>
-                        <div className="text-white font-medium text-sm">
-                          {style.name}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleEdit}
-                  disabled={!editPrompt.trim() || isEditing}
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center">
-                  {isEditing ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Transforming...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      Transform Image
-                    </>
-                  )}
-                </button>
               </div>
             )}
           </div>
@@ -234,9 +180,10 @@ const ImageEditor = () => {
               Transformed Result
             </label>
             {editedImage ? (
-              <div className="bg-slate-800/50 rounded-xl p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">
+              <div className="relative border-2 border-slate-600 rounded-xl bg-slate-800/50 aspect-square overflow-hidden">
+                {/* In-image overlay header */}
+                <div className="absolute top-0 left-0 right-0 z-10 p-3 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent">
+                  <h3 className="text-sm sm:text-base font-semibold text-white">
                     Transformed Image
                   </h3>
                   <button
@@ -246,27 +193,86 @@ const ImageEditor = () => {
                         `transformed-${Date.now()}.jpg`
                       )
                     }
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center">
-                    <Download className="w-4 h-4 mr-2" />
+                    className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg font-medium transition-colors duration-300 flex items-center text-sm shadow-md">
+                    <Download className="w-4 h-4 mr-1.5" />
                     Download
                   </button>
                 </div>
                 <img
                   src={editedImage}
                   alt="Transformed"
-                  className="w-full rounded-lg shadow-2xl"
+                  className="absolute inset-0 w-full h-full object-contain"
                 />
               </div>
             ) : (
-              <div className="border-2 border-dashed border-slate-600 rounded-xl p-12 text-center">
-                <Sparkles className="w-12 h-12 mx-auto mb-4 text-slate-500" />
-                <p className="text-slate-400">
-                  Your transformed image will appear here
-                </p>
+              <div className="relative border-2 border-dashed border-slate-600 rounded-xl bg-slate-800/50 aspect-square overflow-hidden flex items-center justify-center text-center">
+                <div>
+                  <Sparkles className="w-12 h-12 mx-auto mb-4 text-slate-500" />
+                  <p className="text-slate-400">
+                    Your transformed image will appear here
+                  </p>
+                </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Full-width Edit Controls */}
+        {imagePreview && (
+          <div className="mt-8 space-y-6">
+            <div>
+              <label className="block text-white font-medium mb-3">
+                Transformation Prompt
+              </label>
+              <textarea
+                value={editPrompt}
+                onChange={(e) => setEditPrompt(e.target.value)}
+                placeholder="Transform this person into a superhero with cape and mask..."
+                className="w-full h-32 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-white font-medium mb-3">
+                Choose Style
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {styles.map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => setSelectedStyle(style.id)}
+                    className={`p-4 rounded-xl border transition-all duration-300 text-left ${
+                      selectedStyle === style.id
+                        ? "border-blue-500 bg-blue-500/20"
+                        : "border-slate-600 bg-slate-800/30 hover:border-slate-500"
+                    }`}>
+                    <div className="text-white font-medium">{style.name}</div>
+                    <div className="text-slate-400 text-sm mt-1">
+                      {style.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={handleEdit}
+              disabled={!editPrompt.trim() || isEditing}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center">
+              {isEditing ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Transforming...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Transform Image
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -63,76 +63,80 @@ const ImageGenerator = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
         <div className="flex items-center mb-6">
           <Wand2 className="w-6 h-6 text-purple-400 mr-3" />
           <h2 className="text-2xl font-bold text-white">Generate from Text</h2>
         </div>
-
-        <div className="space-y-6">
-          {/* Prompt Input */}
-          <div>
-            <label className="block text-white font-medium mb-3">
-              Describe what you want to create
-            </label>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="A warrior standing on a mountain peak, holding a glowing sword..."
-              className="w-full h-32 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none resize-none"
-            />
-          </div>
-
-          {/* Style Selection */}
-          <div>
-            <label className="block text-white font-medium mb-3">
-              Choose Style
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {styles.map((style) => (
-                <button
-                  key={style.id}
-                  onClick={() => setSelectedStyle(style.id)}
-                  className={`p-4 rounded-xl border transition-all duration-300 text-left ${
-                    selectedStyle === style.id
-                      ? "border-blue-500 bg-blue-500/20"
-                      : "border-slate-600 bg-slate-800/30 hover:border-slate-500"
-                  }`}>
-                  <div className="text-white font-medium">{style.name}</div>
-                  <div className="text-slate-400 text-sm mt-1">
-                    {style.description}
-                  </div>
-                </button>
-              ))}
+        {/* Two-column layout: left controls, right preview (when available) */}
+        <div
+          className={`grid grid-cols-1 gap-8 ${
+            generatedImage ? "md:grid-cols-2" : ""
+          }`}>
+          {/* Left: Controls */}
+          <div className="space-y-6">
+            {/* Prompt Input */}
+            <div>
+              <label className="block text-white font-medium mb-3">
+                Describe what you want to create
+              </label>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="A warrior standing on a mountain peak, holding a glowing sword..."
+                className="w-full h-32 bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none resize-none"
+              />
             </div>
+
+            {/* Style Selection */}
+            <div>
+              <label className="block text-white font-medium mb-3">
+                Choose Style
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {styles.map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => setSelectedStyle(style.id)}
+                    className={`p-4 rounded-xl border transition-all duration-300 text-left ${
+                      selectedStyle === style.id
+                        ? "border-blue-500 bg-blue-500/20"
+                        : "border-slate-600 bg-slate-800/30 hover:border-slate-500"
+                    }`}>
+                    <div className="text-white font-medium">{style.name}</div>
+                    <div className="text-slate-400 text-sm mt-1">
+                      {style.description}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Generate Button */}
+            <button
+              onClick={handleGenerate}
+              disabled={!prompt.trim() || isGenerating}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center">
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Generate Image
+                </>
+              )}
+            </button>
           </div>
 
-          {/* Generate Button */}
-          <button
-            onClick={handleGenerate}
-            disabled={!prompt.trim() || isGenerating}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-slate-600 disabled:to-slate-700 text-white py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center">
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 mr-2" />
-                Generate Image
-              </>
-            )}
-          </button>
-
-          {/* Generated Image */}
+          {/* Right: Preview */}
           {generatedImage && (
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-white">
-                  Generated Image
-                </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-white">Preview</h3>
                 <button
                   onClick={handleDownload}
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center">

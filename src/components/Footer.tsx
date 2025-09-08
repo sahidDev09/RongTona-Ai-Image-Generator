@@ -105,7 +105,7 @@ const Footer = () => {
 
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center">
           <p className="text-slate-400 text-sm">
-            © 2025 RongTona AI. All rights reserved.
+            © 2025 RongTona AI. All rights reserved to SAHID AHMED
           </p>
           <div className="flex items-center space-x-6 mt-4 md:mt-0">
             <a

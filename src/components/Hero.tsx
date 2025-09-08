@@ -44,7 +44,7 @@ const Hero = () => {
           <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-200 bg-clip-text text-transparent mb-6 leading-tight mt-16">
             Sculpt Reality with
             <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-              Digital AI
+              RongTona AI
             </span>
           </h1>
 
