@@ -27,14 +27,15 @@ export class GeminiImageService {
   // Model for image generation/editing via Gemini API
   private readonly imageModelId = "gemini-2.5-flash-image-preview";
 
+  // Retry configuration
+  private readonly maxRetries = 3;
+  private readonly baseDelayMs = 500;
+
   async generateImage(options: GenerationOptions): Promise<string> {
     try {
       const prompt = this.enhancePrompt(options.prompt, options.style);
 
-      const response = await ai.models.generateContent({
-        model: this.imageModelId,
-        contents: [prompt],
-      });
+      const response = await this.callGenerateContentWithRetries([prompt]);
 
       // Find the first image part in the response and return it as a data URL
       type InlinePart = {
@@ -51,8 +52,20 @@ export class GeminiImageService {
       }
 
       throw new Error("No image returned by Gemini.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating image:", error);
+      const code = error?.error?.code || error?.code || error?.statusCode;
+      const status = error?.error?.status || error?.status;
+      if (
+        code === 429 ||
+        status === "RESOURCE_EXHAUSTED" ||
+        error?.__handledByGeminiService
+      ) {
+        throw new Error(
+          "Failed to generate image: quota or rate limit exceeded. Check your plan and billing: https://ai.google.dev/gemini-api/docs/rate-limits and monitor usage: https://ai.dev/usage?tab=rate-limit"
+        );
+      }
+
       throw new Error("Failed to generate image. Please try again.");
     }
   }
@@ -74,10 +87,10 @@ export class GeminiImageService {
         options.style || "action figure"
       }. Maintain the subject's key features and natural lighting.`;
 
-      const response = await ai.models.generateContent({
-        model: this.imageModelId,
-        contents: [enhancedPrompt, imagePart],
-      });
+      const response = await this.callGenerateContentWithRetries([
+        enhancedPrompt,
+        imagePart,
+      ]);
 
       type InlinePart = {
         inlineData?: { data: string; mimeType?: string };
@@ -93,8 +106,20 @@ export class GeminiImageService {
       }
 
       throw new Error("No edited image returned by Gemini.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error editing image:", error);
+      const code = error?.error?.code || error?.code || error?.statusCode;
+      const status = error?.error?.status || error?.status;
+      if (
+        code === 429 ||
+        status === "RESOURCE_EXHAUSTED" ||
+        error?.__handledByGeminiService
+      ) {
+        throw new Error(
+          "Failed to edit image: quota or rate limit exceeded. Check your plan and billing: https://ai.google.dev/gemini-api/docs/rate-limits and monitor usage: https://ai.dev/usage?tab=rate-limit"
+        );
+      }
+
       throw new Error("Failed to edit image. Please try again.");
     }
   }
@@ -116,6 +141,46 @@ export class GeminiImageService {
     const enhancement = style ? styleEnhancements[style] || "" : "";
     // Encourage coherent visuals
     return `${prompt} ${enhancement}. Highly detailed, coherent composition, professional lighting.`.trim();
+  }
+
+  private async callGenerateContentWithRetries(contents: any[]) {
+    const attempt = async (n: number): Promise<any> => {
+      try {
+        return await ai.models.generateContent({
+          model: this.imageModelId,
+          contents,
+        });
+      } catch (err: any) {
+        // Inspect possible error shapes to detect rate limits / quota errors
+        const code = err?.error?.code || err?.code || err?.statusCode;
+        const status = err?.error?.status || err?.status || err?.statusText;
+
+        const isRateLimit =
+          code === 429 || status === "RESOURCE_EXHAUSTED" || status === 429;
+
+        if (isRateLimit && n < this.maxRetries) {
+          const jitter = Math.random() * 100;
+          const delay = this.baseDelayMs * 2 ** n + jitter;
+          console.warn(
+            `Rate limit detected (attempt ${n + 1}). Retrying in ${Math.round(
+              delay
+            )}ms...`
+          );
+          await this.sleep(delay);
+          return attempt(n + 1);
+        }
+
+        // Not retrying or exhausted retries — rethrow with original info attached
+        err.__handledByGeminiService = true;
+        throw err;
+      }
+    };
+
+    return attempt(0);
+  }
+
+  private sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async fileToBase64(file: File): Promise<string> {

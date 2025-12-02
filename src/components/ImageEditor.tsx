@@ -88,9 +88,11 @@ const ImageEditor = () => {
 
       const editedImageUrl = await geminiService.editImage(options);
       setEditedImage(editedImageUrl);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Edit failed:", error);
-      alert("Failed to edit image. Please try again.");
+      const message =
+        error?.message || "Failed to edit image. Please try again.";
+      alert(message);
     } finally {
       setIsEditing(false);
     }
